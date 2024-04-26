@@ -27,7 +27,7 @@ const SpotifyPlayer = () => {
     fetchData: updatePlayer
   } = useAxiosPrivate();
 
-  const [playerState, setPlayerState] = useState(null);
+  const [playerState, setPlayerState] = useState({});
 
   const [selectedOptionIndex, setSelectedOptionIndex] = useState(0);
   const [device, setDevice] = useState();
@@ -44,7 +44,7 @@ const SpotifyPlayer = () => {
 
   useEffect(() => {
     const delayInputTimeoutId = setTimeout(() => {
-      setDebouncedVolume(playerState.device.volume_percent);
+      setDebouncedVolume(playerState?.device?.volume_percent);
     }, 500);
     return () => clearTimeout(delayInputTimeoutId);
   }, [playerState, 250]);
@@ -57,7 +57,9 @@ const SpotifyPlayer = () => {
   }, []);
 
   useEffect(() => {
-    setPlayerState(response);
+    if (response !== null) {
+      setPlayerState(response);
+    }
   }, [response]);
 
   useEffect(() => {
@@ -85,13 +87,13 @@ const SpotifyPlayer = () => {
         deviceIndex = 0;
       }
 
-      console.log('Device: ' + deviceIndex);
-
       const device = devicesResponse.devices[deviceIndex];
 
-      setSelectedOptionIndex(deviceIndex);
-      setDevice(device.id);
-      setInitialization(false);
+      if (device !== undefined) {
+        setSelectedOptionIndex(deviceIndex);
+        setDevice(device.id);
+        setInitialization(false);
+      }
     }
   }, [devicesResponse]);
 
@@ -127,14 +129,12 @@ const SpotifyPlayer = () => {
   };
 
   useEffect(() => {
-    if (playerState !== null) {
-      console.log(playerState);
-      console.log(playerState.device.volume_percent);
-      updatePlayer({
-        url: `me/player/volume?volume_percent=${playerState.device.volume_percent}&device_id=${device}`,
-        method: 'PUT'
-      });
-    }
+    console.log(playerState);
+    console.log(playerState?.device.volume_percent);
+    updatePlayer({
+      url: `me/player/volume?volume_percent=${playerState?.device?.volume_percent}&device_id=${playerState?.device?.id}`,
+      method: 'PUT'
+    });
   }, [debouncedVolume]);
 
   const handleChange = (event, index) => {
@@ -170,76 +170,79 @@ const SpotifyPlayer = () => {
             </Card.Header>
           )}
           <Card.Body>
-            <Row>
-              <Col xs="auto">
-                <Image
-                  className="m-3"
-                  height="100px"
-                  src={playerState?.item?.album.images[0].url}
-                />
-                <ProgressBar
-                  style={{ height: '1px' }}
-                  className="mb-3"
-                  now={
-                    (playerState?.progress_ms /
-                      playerState?.item?.duration_ms) *
-                    100
-                  }
-                />
-              </Col>
-              <Col>
-                <div>Artist: {playerState?.item?.artists[0].name}</div>
-                <div>Album: {playerState?.item?.album.name}</div>
-                <div>Track: {playerState?.item?.name}</div>
-                <div>Device: {playerState?.device.volume_percent}</div>
+            {response !== '' ? (
+              <Row>
+                <Col xs="auto">
+                  <Image
+                    className="m-3"
+                    height="100px"
+                    src={playerState?.item?.album.images[0].url}
+                  />
+                  <ProgressBar
+                    style={{ height: '1px' }}
+                    className="mb-3"
+                    now={
+                      (playerState?.progress_ms /
+                        playerState?.item?.duration_ms) *
+                      100
+                    }
+                  />
+                </Col>
+                <Col>
+                  <div>Artist: {playerState?.item?.artists[0].name}</div>
+                  <div>Album: {playerState?.item?.album.name}</div>
+                  <div>Track: {playerState?.item?.name}</div>
 
-                <FontAwesomeIcon className="fs-9 me-3" icon="volume-up" />
-                <input
-                  className="form-range"
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={playerState?.device.volume_percent}
-                  onChange={updateRangeVolume}
-                  id="customRange2"
-                ></input>
+                  <FontAwesomeIcon className="fs-9 me-3" icon="volume-up" />
+                  <input
+                    className="form-range"
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={playerState?.device.volume_percent}
+                    onChange={updateRangeVolume}
+                    id="customRange2"
+                  ></input>
 
-                <ButtonGroup>
-                  <Button
-                    variant="link"
-                    className="me-2 mb-1"
-                    onClick={() => handleEvent('previous')}
-                  >
-                    <FontAwesomeIcon icon="step-backward" />
-                  </Button>
-                  {playerState?.is_playing ? (
+                  <ButtonGroup>
                     <Button
                       variant="link"
                       className="me-2 mb-1"
-                      onClick={() => handleEvent('pause')}
+                      onClick={() => handleEvent('previous')}
                     >
-                      <FontAwesomeIcon icon="pause" />
+                      <FontAwesomeIcon icon="step-backward" />
                     </Button>
-                  ) : (
+                    {playerState?.is_playing ? (
+                      <Button
+                        variant="link"
+                        className="me-2 mb-1"
+                        onClick={() => handleEvent('pause')}
+                      >
+                        <FontAwesomeIcon icon="pause" />
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="link"
+                        className="me-2 mb-1"
+                        onClick={() => handleEvent('play')}
+                      >
+                        <FontAwesomeIcon icon="play" />
+                      </Button>
+                    )}
+
                     <Button
                       variant="link"
                       className="me-2 mb-1"
-                      onClick={() => handleEvent('play')}
+                      onClick={() => handleEvent('next')}
                     >
-                      <FontAwesomeIcon icon="play" />
+                      <FontAwesomeIcon icon="step-forward" />
                     </Button>
-                  )}
-
-                  <Button
-                    variant="link"
-                    className="me-2 mb-1"
-                    onClick={() => handleEvent('next')}
-                  >
-                    <FontAwesomeIcon icon="step-forward" />
-                  </Button>
-                </ButtonGroup>
-              </Col>
-            </Row>
+                  </ButtonGroup>
+                </Col>
+              </Row>
+            ) : (
+              "Please ensure you're playing Spotify on a device that is tied to the same account you authorized here."
+            )}
           </Card.Body>
         </Card>
       </Col>

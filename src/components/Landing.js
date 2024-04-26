@@ -1,5 +1,6 @@
 import axios from 'axios';
 import useAxiosPrivate from 'hooks/useAxiosPrivate';
+import { useAuth } from 'providers/AuthProvider';
 import React, { useEffect, useState } from 'react';
 import { Button, Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
@@ -13,6 +14,7 @@ const Landing = () => {
   const { response, loading, fetchData } = useAxiosPrivate();
   const [loaded, setLoaded] = useState(false);
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')));
+  const { auth, setAuth } = useAuth();
 
   /* const [myParams, setMyParams] = useSearchParams();
 
@@ -48,6 +50,7 @@ const Landing = () => {
       );
 
       localStorage.setItem('token', JSON.stringify(response.data));
+      setAuth({ loggedIn: true });
       setLoaded(true);
     } catch (e) {
       console.log(e);
@@ -90,12 +93,10 @@ const Landing = () => {
           <Card.Text>{user?.display_name}</Card.Text>
         </Card.Body>
         <Card.Footer>
-          {user !== null ? (
-            <>
-              <Link to="spotify">
-                <Button>Let's Go</Button>
-              </Link>
-            </>
+          {auth.loggedIn ? (
+            <Link to="spotify">
+              <Button>Let's Go</Button>
+            </Link>
           ) : (
             <Button disabled={loaded} onClick={handleSubmit}>
               Launch Spotify

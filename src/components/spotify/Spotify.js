@@ -59,7 +59,7 @@ const Spotify = () => {
                       name="searchQuery"
                     />
                   </Col>
-                  <Col className="d-md-block d-none" sm="auto">
+                  <Col className="d-md-block d-none text-end" sm="auto">
                     <Form.Select size="sm">
                       <option value="">Search All</option>
                       {options.map(option => (
@@ -67,7 +67,7 @@ const Spotify = () => {
                       ))}
                     </Form.Select>
                   </Col>
-                  <Col className="d-md-block d-none">
+                  <Col className="d-md-block d-none text-end" sm="auto">
                     <Button
                       variant="primary"
                       className="me-2 mb-1"
