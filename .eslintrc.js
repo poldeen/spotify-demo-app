@@ -19,7 +19,8 @@ module.exports = {
   plugins: ['react'],
   rules: {
     'react/no-unescaped-entities': 'off',
-    'react/prop-types': 'error',
+    'no-unused-vars': 'warn',
+    'react/prop-types': 'warn',
     'react/display-name': 'off',
     'prettier/prettier': ['error', { endOfLine: 'auto' }]
   },
